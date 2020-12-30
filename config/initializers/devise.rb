@@ -28,6 +28,8 @@ Devise.setup do |config|
     jwt.expiration_time = 1.day.to_i
   end
 
+  config.navigational_formats = []
+
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.
   # config.parent_controller = 'DeviseController'
