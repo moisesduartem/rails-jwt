@@ -1,14 +1,14 @@
-# 1. Dependencies
+# 1. Installing Dependencies
 
+First, go to the `Gemfile` and paste the following content:
 ```
 # JWT GEMS
-gem 'dotenv-rails', groups: [:development, :test]
-gem 'devise'
-gem 'devise-jwt'
+gem 'dotenv-rails', groups: [:development, :test] # For enviroment variables management & isolation at .env file
+gem 'devise' # User management
+gem 'devise-jwt' # JWT (JSON Web Token) configuration for devise
 ```
 
-Then, run
-
+Then, bundle command to install the added gems:
 ```
 $ bundle install 
 
@@ -19,17 +19,18 @@ $ bundle
 
 # 2. Inicializating Devise
 
+Install the basics to use devise:
 ```
 $ rails generate devise:install
 ```
-
+Generate the User model with devise:
 ```
 $ rails generate devise User
 ```
 
 # 3. Adapting user model 
 
-user.rb (model)
+Now, we need to configure the User model to work with `devise-jwt`:
 ```
 class User < ApplicationRecord
   include Devise::JWT::RevocationStrategies::JTIMatcher
@@ -40,8 +41,8 @@ class User < ApplicationRecord
          jwt_revocation_strategy: self
 end
 ```
-
-migration
+  
+We are using the JTI revocation strategy (the Gem have others), now you MUST add the following content to a **new migration** to add the JTI columns to users table:
 ```
   def change
     add_column :users, :jti, :string, null: false
@@ -56,7 +57,7 @@ migration
 
 # 4. Configuring devise
 
-devise.rb (initializer)
+Go to the **devise initializer** and paste the following content to configure the token options:
 ```
 # DEVISE JWT
 config.jwt do |jwt|
@@ -73,20 +74,25 @@ end
 config.navigational_formats = []
 ```
 
+Generate a random secret key on terminal and copy that to paste at the .env file.
 ```
 $ rails secret
 ```
 
-.env file
+* The `.env` file must be like this:
 ```
-DEVISE_JWT_SECRET_KEY
+...
+DEVISE_JWT_SECRET_KEY=your_secret_key
+....
 ```
 
 # 5. Login/logout endpoints
+Now, we have to configure the login & logout endpoints with a controller to start or end a session.
 ```
 $ rails generate controller auth/sessions
 ```
 
+After created, paste the following content at the controller:
 ```
 class Auth::SessionsController < Devise::SessionsController
     respond_to :json
@@ -102,10 +108,12 @@ end
 ```
 
 # 5. Registration endpoint
+Now, we have to configure the registration endpoint with a controller to create a new user.
 ```
 $ rails generate controller auth/registrations
 ```
 
+After created, paste the following content at the controller:
 ```
 class Auth::RegistrationsController < Devise::RegistrationsController
     respond_to :json
@@ -145,6 +153,7 @@ end
 ```
 
 # 7. Protecting routes
+
 Example:
 ```
 class ProtectedController < ApplicationController
